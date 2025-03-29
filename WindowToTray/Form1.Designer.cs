@@ -28,12 +28,14 @@
             // 
             // btnMinimizeSelected
             // 
-            btnMinimizeSelected.Location = new Point(423, 307);
+            btnMinimizeSelected.BackColor = SystemColors.Control;
+            btnMinimizeSelected.Location = new Point(325, 380);
+            btnMinimizeSelected.Margin = new Padding(4, 3, 4, 3);
             btnMinimizeSelected.Name = "btnMinimizeSelected";
-            btnMinimizeSelected.Size = new Size(120, 32);
+            btnMinimizeSelected.Size = new Size(120, 31);
             btnMinimizeSelected.TabIndex = 1;
             btnMinimizeSelected.Text = "Свернуть окно";
-            btnMinimizeSelected.UseVisualStyleBackColor = true;
+            btnMinimizeSelected.UseVisualStyleBackColor = false;
             btnMinimizeSelected.Click += btnMinimizeSelected_Click;
             // 
             // trayIcon
@@ -47,40 +49,48 @@
             // 
             listBoxWindows.FormattingEnabled = true;
             listBoxWindows.ItemHeight = 15;
-            listBoxWindows.Location = new Point(233, 12);
+            listBoxWindows.Location = new Point(234, 50);
+            listBoxWindows.Margin = new Padding(4, 3, 4, 3);
             listBoxWindows.Name = "listBoxWindows";
-            listBoxWindows.Size = new Size(310, 289);
+            listBoxWindows.Size = new Size(308, 289);
             listBoxWindows.TabIndex = 2;
             // 
             // btnRefresh
             // 
-            btnRefresh.Location = new Point(233, 307);
+            btnRefresh.BackColor = SystemColors.Control;
+            btnRefresh.Location = new Point(234, 345);
+            btnRefresh.Margin = new Padding(4, 3, 4, 3);
             btnRefresh.Name = "btnRefresh";
-            btnRefresh.Size = new Size(120, 32);
+            btnRefresh.Size = new Size(120, 31);
             btnRefresh.TabIndex = 3;
             btnRefresh.Text = "Обновить";
-            btnRefresh.UseVisualStyleBackColor = true;
+            btnRefresh.UseVisualStyleBackColor = false;
             btnRefresh.Click += btnRefresh_Click;
             // 
             // btnMinimizeApp
             // 
-            btnMinimizeApp.Location = new Point(296, 345);
+            btnMinimizeApp.BackColor = SystemColors.Control;
+            btnMinimizeApp.Location = new Point(424, 345);
+            btnMinimizeApp.Margin = new Padding(4, 3, 4, 3);
             btnMinimizeApp.Name = "btnMinimizeApp";
-            btnMinimizeApp.Size = new Size(183, 32);
+            btnMinimizeApp.Size = new Size(120, 31);
             btnMinimizeApp.TabIndex = 4;
-            btnMinimizeApp.Text = "Свернуть приложение";
-            btnMinimizeApp.UseVisualStyleBackColor = true;
+            btnMinimizeApp.Text = "В трей";
+            btnMinimizeApp.UseVisualStyleBackColor = false;
             btnMinimizeApp.Click += btnMinimizeApp_Click;
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = SystemColors.ScrollBar;
             ClientSize = new Size(800, 450);
             Controls.Add(btnMinimizeApp);
             Controls.Add(btnRefresh);
             Controls.Add(listBoxWindows);
             Controls.Add(btnMinimizeSelected);
+            FormBorderStyle = FormBorderStyle.None;
+            Margin = new Padding(4, 3, 4, 3);
             Name = "Form1";
             Text = "WindowToTray";
             Load += Form1_Load;
