@@ -3,12 +3,14 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Text;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Linq;
 
 namespace WindowToTray
 {
     public partial class Form1 : Form
     {
-        // WinAPI импорт
         [DllImport("user32.dll", CharSet = CharSet.Unicode)]
         private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
@@ -26,14 +28,85 @@ namespace WindowToTray
         [DllImport("user32.dll")]
         private static extern bool IsWindowVisible(IntPtr hWnd);
 
+        [DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
+        private static extern IntPtr CreateRoundRectRgn(
+            int nLeftRect, int nTopRect, int nRightRect, int nBottomRect,
+            int nWidthEllipse, int nHeightEllipse);
+
+        [DllImport("user32.dll")]
+        private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+
+        [DllImport("user32.dll")]
+        private static extern bool ReleaseCapture();
+
         private const int SW_HIDE = 0;
         private const int SW_SHOW = 5;
+        private const int WM_NCLBUTTONDOWN = 0xA1;
+        private const int HT_CAPTION = 0x2;
+
         private readonly List<WindowInfo> windows = new List<WindowInfo>();
         private readonly Dictionary<IntPtr, NotifyIcon> minimizedWindows = new Dictionary<IntPtr, NotifyIcon>();
 
         public Form1()
         {
             InitializeComponent();
+            ApplyDiscordStyle();
+            SetupTitleBar();
+        }
+
+        private void SetupTitleBar()
+        {
+            btnClose.Click += (s, e) => Close();
+            btnMaximize.Click += (s, e) =>
+            {
+                WindowState = WindowState == FormWindowState.Maximized
+                    ? FormWindowState.Normal
+                    : FormWindowState.Maximized;
+                btnMaximize.Text = WindowState == FormWindowState.Maximized ? "?" : "?";
+            };
+            btnMinimize.Click += (s, e) => WindowState = FormWindowState.Minimized;
+
+            titleBar.MouseDown += (s, e) =>
+            {
+                if (e.Button == MouseButtons.Left)
+                {
+                    ReleaseCapture();
+                    SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
+                }
+            };
+        }
+
+        private void ApplyDiscordStyle()
+        {
+            // Форма
+            this.BackColor = Color.FromArgb(54, 57, 63);
+            this.ForeColor = Color.White;
+            this.Region = Region.FromHrgn(CreateRoundRectRgn(0, 0, Width, Height, 15, 15));
+
+            // ListBox
+            listBoxWindows.BackColor = Color.FromArgb(64, 68, 75);
+            listBoxWindows.ForeColor = Color.White;
+            listBoxWindows.BorderStyle = BorderStyle.None;
+            listBoxWindows.Font = new Font("Segoe UI", 10);
+
+            // Кнопки управления окном
+            btnClose.FlatAppearance.MouseOverBackColor = Color.FromArgb(232, 17, 35);
+            btnMaximize.FlatAppearance.MouseOverBackColor = Color.FromArgb(66, 70, 77);
+            btnMinimize.FlatAppearance.MouseOverBackColor = Color.FromArgb(66, 70, 77);
+
+            // Основные кнопки
+            var buttons = new[] { btnMinimizeSelected, btnRefresh, btnMinimizeApp };
+            foreach (var btn in buttons)
+            {
+                btn.FlatStyle = FlatStyle.Flat;
+                btn.FlatAppearance.BorderSize = 0;
+                btn.BackColor = Color.FromArgb(88, 101, 242);
+                btn.ForeColor = Color.White;
+                btn.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+
+                btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(71, 82, 196);
+                btn.FlatAppearance.MouseDownBackColor = Color.FromArgb(60, 70, 180);
+            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -65,13 +138,11 @@ namespace WindowToTray
             }, IntPtr.Zero);
         }
 
-        // Обработчик для кнопки обновления (должен совпадать с Designer.cs)
         private void btnRefresh_Click(object sender, EventArgs e)
         {
             RefreshWindowList();
         }
 
-        // Обработчик для кнопки сворачивания окна (должен совпадать с Designer.cs)
         private void btnMinimizeSelected_Click(object sender, EventArgs e)
         {
             if (listBoxWindows.SelectedIndex >= 0)
@@ -98,11 +169,10 @@ namespace WindowToTray
             else
             {
                 MessageBox.Show("Выберите окно из списка!", "Ошибка",
-                              MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // Обработчик для кнопки сворачивания приложения (должен совпадать с Designer.cs)
         private void btnMinimizeApp_Click(object sender, EventArgs e)
         {
             this.Hide();
@@ -112,15 +182,14 @@ namespace WindowToTray
         private void trayIcon_DoubleClick(object sender, EventArgs e)
         {
             this.Show();
-            this.WindowState = FormWindowState.Normal;
             trayIcon.Visible = false;
         }
 
         private void Form1_Resize(object sender, EventArgs e)
         {
-            if (this.WindowState == FormWindowState.Minimized)
+            if (WindowState == FormWindowState.Minimized)
             {
-                this.Hide();
+                Hide();
                 trayIcon.Visible = true;
             }
         }
